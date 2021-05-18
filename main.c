@@ -17,21 +17,9 @@
 
 #include "mzapo_parlcd.h"
 #include "mzapo_api.h"
+#include "bitmap.h"
 
-static void fill_bitmap(bitmap b, uint32_t color)
-{
-    uint32_t *line = b.pixels;
-    for(int y = 0; y < b.height; ++y)
-    {
-        uint32_t *pixel = line;
-        for(int x = 0; x < b.width; ++x)
-        {
-            *pixel = color;
-            ++pixel;
-        }
-        line += b.width;
-    }
-}
+#include "font_types.h"
 
 int main(int argc, char *argv[])
 {
@@ -43,20 +31,25 @@ int main(int argc, char *argv[])
         0xff00ff
     };
 
-    bitmap frame;
-    frame.width = 480;
-    frame.height = 320;
-    frame.pixels = malloc(4*frame.width*frame.height);
+    bitmap frame = make_bitmap(480, 320);
 
     for(int i = 0;; ++i)
     {
         apo_led_set_color(1, colors[i % (sizeof(colors)/sizeof(colors[0]))]);
         apo_led_set_color(2, colors[(i+1) % (sizeof(colors)/sizeof(colors[0]))]);
-        fill_bitmap(frame, colors[i % (sizeof(colors)/sizeof(colors[0]))]);
+        fill_bitmap(frame, 0);
+
+        char *string = "Hello,\nWorld.";
+        int width, height;
+        get_string_size(&font_winFreeSystem14x16, 4, string, &width, &height);
+        draw_rect(frame, 100, 100, 100+width, 100+height, 0x0000ff00);
+        draw_string(frame, 100, 100, NULL, NULL, &font_winFreeSystem14x16, 4, string, 0x00ff0000);
+        
         apo_lcd_draw_frame(frame);
         printf("CHANGING COLOR AND DRAWING BITMAP!\n");
         sleep(4);
     }
 
+    free_bitmap(&frame);
     return 0;
 }

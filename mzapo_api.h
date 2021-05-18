@@ -9,15 +9,10 @@
 
  *******************************************************************/
 
-#if !defined(MZAPO_API_H)
+#ifndef MZAPO_API_H
 #define MZAPO_API_H
 
-typedef struct bitmap
-{
-    int width;
-    int height;
-    uint32_t *pixels;
-} bitmap;
+#include "bitmap.h"
 
 void apo_initialise(void);
 
