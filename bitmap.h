@@ -33,4 +33,6 @@ void get_string_size(font_descriptor_t *font, int scale, char *string, int *out_
 
 void draw_string(bitmap b, int x, int y, int *out_x, int *out_y, font_descriptor_t *font, int scale, char *string, uint32_t color);
 
+void draw_shaded_rect(bitamp b, int x0, int y0, int x1, int y1, uint32_t color_base, uint32_t color_dark, uint32_t color_light);
+
 #endif
