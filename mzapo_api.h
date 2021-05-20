@@ -14,10 +14,24 @@
 
 #include "bitmap.h"
 
+typedef enum key_id
+{
+    KEY_NONE = 0,
+    KEY_ESCAPE,
+    KEY_ENTER,
+    KEY_LEFT,
+    KEY_UP,
+    KEY_RIGHT,
+    KEY_DOWN,
+    KEY_SPACE,
+} key_id;
+
 void apo_initialise(void);
 
 void apo_led_set_color(int led_id, uint32_t color);
 
 void apo_lcd_draw_frame(bitmap frame);
+
+key_id apo_read_key_input(void);
 
 #endif

@@ -13,6 +13,9 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <termios.h>
 
 #include "mzapo_parlcd.h"
 #include "mzapo_phys.h"
@@ -94,6 +97,14 @@ apo_initialise(void)
 {
     init_led();
     init_lcd();
+
+    fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+    struct termios attrs;
+    tcgetattr(STDIN_FILENO, &attrs);
+    cfmakeraw(&attrs);
+    // Disable echo mode
+    attrs.c_lflag &= ~ECHO;
+    tcsetattr(STDIN_FILENO, TCSANOW, &attrs);
 }
 
 void
@@ -115,5 +126,60 @@ apo_led_set_color(int led_id, uint32_t color)
         {
             printf("Attempted to write color %x to LED number %d, which isn't supported\n", color, led_id);
         } break;
+    }
+}
+
+key_id
+apo_read_key_input(void)
+{
+    char buffer[1];
+
+    int ret;
+    for(;;)
+    {
+        ret = read(STDIN_FILENO, buffer, sizeof(buffer));
+
+        if(ret == -1)
+        {
+            return KEY_NONE;
+        }
+        else
+        {
+            switch(buffer[0])
+            {
+                case ' ':
+                    return KEY_SPACE;
+                case 13:
+                case 10:
+                    return KEY_ENTER;
+                case 27:
+                {
+                    // Special code
+                    ret = read(STDIN_FILENO, buffer, sizeof(buffer));
+                    if(ret != -1 && buffer[0] == 91)
+                    {
+                        ret = read(STDIN_FILENO, buffer, sizeof(buffer));
+                        if(ret != -1)
+                        {
+                            switch(buffer[0])
+                            {
+                                case 65:
+                                    return KEY_UP;
+                                case 66:
+                                    return KEY_DOWN;
+                                case 67:
+                                    return KEY_RIGHT;
+                                case 68:
+                                    return KEY_LEFT;
+                            }
+                        }
+                    }
+                    // Assume escape otherwise
+                    // This means that other scan codes like break, ...
+                    // are also considered escape codes
+                    return KEY_ESCAPE;
+                }
+            }
+        }
     }
 }
