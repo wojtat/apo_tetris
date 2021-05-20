@@ -180,6 +180,7 @@ apo_read_key_input(void)
                     return KEY_ESCAPE;
                 }
             }
+            return KEY_NONE;
         }
     }
 }

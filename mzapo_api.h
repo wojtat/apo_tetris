@@ -16,7 +16,7 @@
 
 typedef enum key_id
 {
-    KEY_NONE = 0,
+    KEY_NONE = -1,
     KEY_ESCAPE,
     KEY_ENTER,
     KEY_LEFT,
@@ -24,6 +24,8 @@ typedef enum key_id
     KEY_RIGHT,
     KEY_DOWN,
     KEY_SPACE,
+
+    KEY_COUNT
 } key_id;
 
 void apo_initialise(void);
