@@ -53,7 +53,7 @@ draw_rect(bitmap b, int x0, int y0, int x1, int y1, uint32_t color)
 }
 
 void
-draw_shaded_rect(bitamp b, int x0, int y0, int x1, int y1, uint32_t color_base, uint32_t color_dark, uint32_t color_light)
+draw_shaded_rect(bitmap b, int x0, int y0, int x1, int y1, uint32_t color_base, uint32_t color_dark, uint32_t color_light)
 {
     draw_rect(b, x0, y0, x1, y1, color_dark);
     draw_rect(b, x0+1, y0, x1, y1-1, color_light);
