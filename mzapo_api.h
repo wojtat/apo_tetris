@@ -32,6 +32,8 @@ void apo_initialise(void);
 
 void apo_led_set_color(int led_id, uint32_t color);
 
+void apo_led_line_set_word(uint32_t word);
+
 void apo_lcd_draw_frame(bitmap frame);
 
 key_id apo_read_key_input(void);

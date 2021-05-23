@@ -129,6 +129,12 @@ apo_led_set_color(int led_id, uint32_t color)
     }
 }
 
+void
+apo_led_line_set_word(uint32_t word)
+{
+    *(volatile uint32_t *)(led_base + SPILED_REG_LED_LINE_o) = word;
+}
+
 key_id
 apo_read_key_input(void)
 {
