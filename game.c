@@ -277,6 +277,9 @@ remove_filled_lines(game *g)
         }
         --destination_row_index;
     }
+
+    g->total_lines += g->linefill.filled_lines_count;
+    g->score += g->linefill.filled_lines_count*100;
 }
 
 static int
@@ -372,10 +375,21 @@ draw_gameover(game *g, bitmap frame)
 {
     char *string = "GAME OVER";
     int width;
-    get_string_size(g->font, g->scale, string, &width, NULL);
+    get_string_size(g->font, g->scale_large, string, &width, NULL);
     int start_x = (frame.width - width) / 2;
     int start_y = frame.height / 2;
-    draw_string(frame, start_x, start_y, NULL, NULL, g->font, g->scale, string, 0xffffff);
+    draw_string(frame, start_x, start_y, NULL, NULL, g->font, g->scale_large, string, 0xffffff);
+}
+
+static void
+draw_statistics(game *g, bitmap frame)
+{
+    int top = 0;
+    int left = (frame.width + FIELD_TILE_SIZE*FIELD_WIDTH) / 2;
+
+    char stats[64];
+    int length = sprintf(stats, "LEVEL\n%06d\n\nLINES\n%06d\n\nSCORE\n%06d", g->level, g->total_lines, g->score);
+    draw_string(frame, left, top, NULL, NULL, g->font, g->scale_small, stats, 0xffffff);
 }
 
 static void
@@ -388,6 +402,7 @@ draw_game(game *g, bitmap frame)
         {
             draw_playing_field(g, frame);
             draw_piece(g, frame);
+            draw_statistics(g, frame);
         } break;
 
         case GAME_GAMEOVER:

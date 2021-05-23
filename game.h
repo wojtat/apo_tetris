@@ -52,11 +52,13 @@ typedef struct game
 
     uint8_t field[FIELD_WIDTH*FIELD_HEIGHT];
     int level;
+    int total_lines;
     int score;
     tetromino active;
 
     font_descriptor_t *font;
-    int scale;
+    int scale_large;
+    int scale_small;
 
     struct
     {
