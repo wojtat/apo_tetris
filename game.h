@@ -51,6 +51,7 @@ typedef struct game
     game_state state;
 
     uint8_t field[FIELD_WIDTH*FIELD_HEIGHT];
+    int start_level;
     int level;
     int total_lines;
     int score;

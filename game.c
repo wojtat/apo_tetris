@@ -279,7 +279,29 @@ remove_filled_lines(game *g)
     }
 
     g->total_lines += g->linefill.filled_lines_count;
-    g->score += g->linefill.filled_lines_count*100;
+    switch(g->linefill.filled_lines_count)
+    {
+        case 1:
+        {
+            g->score += (g->level+1) * 40;
+        } break;
+        case 2:
+        {
+            g->score += (g->level+1) * 100;
+        } break;
+        case 3:
+        {
+            g->score += (g->level+1) * 300;
+        } break;
+        case 4:
+        {
+            g->score += (g->level+1) * 1200;
+        } break;
+    }
+    if(g->total_lines >= 10*(g->level - g->start_level + 1))
+    {
+        ++g->level;
+    }
 }
 
 static int
@@ -388,7 +410,7 @@ draw_statistics(game *g, bitmap frame)
     int left = (frame.width + FIELD_TILE_SIZE*FIELD_WIDTH) / 2;
 
     char stats[64];
-    int length = sprintf(stats, "LEVEL\n%06d\n\nLINES\n%06d\n\nSCORE\n%06d", g->level, g->total_lines, g->score);
+    sprintf(stats, "LEVEL\n%06d\n\nLINES\n%06d\n\nSCORE\n%06d", g->level, g->total_lines, g->score);
     draw_string(frame, left, top, NULL, NULL, g->font, g->scale_small, stats, 0xffffff);
 }
 
