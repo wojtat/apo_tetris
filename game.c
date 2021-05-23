@@ -39,13 +39,13 @@ static uint8_t piece_values_O[] = {
     5,5,
 };
 
-static uint8_t piece_values_L[] = {
+static uint8_t piece_values_J[] = {
     6,0,0,
     6,6,6,
     0,0,0,
 };
 
-static uint8_t piece_values_J[] = {
+static uint8_t piece_values_L[] = {
     0,0,7,
     7,7,7,
     0,0,0,
@@ -77,12 +77,12 @@ const tetromino_desc tetrominoes[TETROMINO_COUNT] = {
         2,
         piece_values_O
     },
-    // Z piece
+    // L piece
     {
         3,
         piece_values_L
     },
-    // Z piece
+    // J piece
     {
         3,
         piece_values_J
@@ -90,33 +90,13 @@ const tetromino_desc tetrominoes[TETROMINO_COUNT] = {
 };
 
 const uint32_t colors_base[] = {
-    0x282828,
-    0x2D9999,
-    0x99992D,
-    0x992D99,
-    0x2D9951,
-    0x2D6399,
-    0x99632D
-};
-
-const uint32_t colors_dark[] = {
-    0x282828,
-    0x1E6666,
-    0x66661E,
-    0x661E66,
-    0x1E6636,
-    0x1E4266,
-    0x66421E
-};
-
-const uint32_t colors_light[] = {
-    0x282828,
-    0x44E5E5,
-    0xE5E544,
-    0xE544E5,
-    0x44E57A,
-    0x4495E5,
-    0xE59544
+    0x21d7de,
+    0xe651de,
+    0x21d729,
+    0xff3d29,
+    0xffe729,
+    0xe69629,
+    0x0010ce
 };
 
 static int
@@ -296,25 +276,6 @@ remove_filled_lines(game *g)
 }
 
 static int
-update_game_linefill(game *g, input *in, bitmap frame)
-{
-    --g->linefill.frames_left;
-    if(g->linefill.frames_left <= 0)
-    {
-        apo_led_line_set_word(0);
-        g->state = GAME_PLAYING;
-        remove_filled_lines(g);
-        spawn_new_piece(g);
-        return 0;
-    }
-
-    apo_led_line_set_word(g->linefill.led_word);
-    g->linefill.led_word = ~g->linefill.led_word;
-
-    return 0;
-}
-
-static int
 get_filled_lines(game *g, uint8_t *filled_lines_array)
 {
     int filled_lines_count = 0;
@@ -369,10 +330,10 @@ draw_piece(game *g, bitmap frame)
             {
                 int actual_x = x + g->active.xoff;
                 int actual_y = y + g->active.yoff;
-                draw_shaded_rect(frame,
+                draw_rect(frame,
                     left + actual_x*FIELD_TILE_SIZE, top + actual_y*FIELD_TILE_SIZE,
                     left + (actual_x+1)*FIELD_TILE_SIZE, top + (actual_y+1)*FIELD_TILE_SIZE,
-                    colors_base[value-1], colors_dark[value-1], colors_light[value-1]);
+                    colors_base[value-1]);
             }
         }
     }
@@ -384,6 +345,8 @@ draw_playing_field(game *g, bitmap frame)
     int top = (FIELD_VISIBLE_HEIGHT - FIELD_HEIGHT)*FIELD_TILE_SIZE;
     int left = (frame.width - FIELD_TILE_SIZE*FIELD_WIDTH) / 2;
 
+    draw_rect(frame, left, top, left + FIELD_WIDTH*FIELD_TILE_SIZE, top + FIELD_HEIGHT*FIELD_TILE_SIZE, 0x333333);
+
     for(int y = FIELD_HEIGHT - FIELD_VISIBLE_HEIGHT; y < FIELD_HEIGHT; ++y)
     {
         for(int x = 0; x < FIELD_WIDTH; ++x)
@@ -391,23 +354,44 @@ draw_playing_field(game *g, bitmap frame)
             uint8_t value = g->field[y*FIELD_WIDTH + x];
             if(value)
             {
-                draw_shaded_rect(frame,
+                draw_rect(frame,
                     left + x*FIELD_TILE_SIZE, top + y*FIELD_TILE_SIZE,
                     left + (x+1)*FIELD_TILE_SIZE, top + (y+1)*FIELD_TILE_SIZE,
-                    colors_base[value-1], colors_dark[value-1], colors_light[value-1]);
+                    colors_base[value-1]);
             }
         }
     }
 }
 
+static void
+draw_game(game *g, bitmap frame)
+{
+    draw_playing_field(g, frame);
+    draw_piece(g, frame);
+}
+
+static int
+update_game_linefill(game *g, input *in, bitmap frame)
+{
+    --g->linefill.frames_left;
+    if(g->linefill.frames_left <= 0)
+    {
+        apo_led_line_set_word(0);
+        g->state = GAME_PLAYING;
+        remove_filled_lines(g);
+        spawn_new_piece(g);
+        return 0;
+    }
+
+    apo_led_line_set_word(g->linefill.led_word);
+    g->linefill.led_word = ~g->linefill.led_word;
+
+    return 0;
+}
+
 static int
 update_game_playing(game *g, input *in, bitmap frame)
 {
-    if(in->keys[KEY_ESCAPE])
-    {
-        return 1;
-    }
-
     if(in->keys[KEY_UP])
     {
         rotate(g);
@@ -445,26 +429,31 @@ update_game_playing(game *g, input *in, bitmap frame)
         }
     }
 
-    draw_playing_field(g, frame);
-    draw_piece(g, frame);
-
+    if(in->keys[KEY_ESCAPE])
+    {
+        return 1;
+    }
     return 0;
 }
 
 int
 update_game(game *g, input *in, bitmap frame)
 {
+    int should_quit = 0;
     switch(g->state)
     {
         case GAME_PLAYING:
         {
-            return update_game_playing(g, in, frame);
+            should_quit = update_game_playing(g, in, frame);
         } break;
 
         case GAME_LINEFILL:
         {
-            return update_game_linefill(g, in, frame);
+            should_quit = update_game_linefill(g, in, frame);
         } break;
     }
-    return 0;
+
+    draw_game(g, frame);
+
+    return should_quit;
 }
