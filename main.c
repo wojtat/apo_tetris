@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
 
     bitmap frame = make_bitmap(480, 320);
     game g = {0};
+    g.state = GAME_PLAYING;
 
     float last_frame_time = get_current_time();
     float target_millis_per_frame = 1000.f / 20.f;

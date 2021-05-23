@@ -15,7 +15,7 @@
 
 enum
 {
-    TETROMINO_COUNT = 5,
+    TETROMINO_COUNT = 7,
 
     FIELD_WIDTH = 10,
     FIELD_HEIGHT = 22,
@@ -42,15 +42,25 @@ typedef struct tetromino
 typedef enum game_state
 {
     GAME_PLAYING,
+    GAME_LINEFILL,
 } game_state;
 
 typedef struct game
 {
     game_state state;
 
-    int level;
-    tetromino active;
     uint8_t field[FIELD_WIDTH*FIELD_HEIGHT];
+    int level;
+    int score;
+    tetromino active;
+
+    struct
+    {
+        int frames_left;
+        int filled_lines_count;
+        uint8_t filled_lines[FIELD_HEIGHT];
+        uint32_t led_word;
+    } linefill;
 } game;
 
 typedef struct input

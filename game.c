@@ -9,43 +9,49 @@ enum
     FIELD_TILE_SIZE = 16,
 };
 
-static uint8_t piece_values_I[] =
-{
+static uint8_t piece_values_I[] = {
     0,0,0,0,
     0,0,0,0,
     1,1,1,1,
     0,0,0,0,
 };
 
-static uint8_t piece_values_T[] =
-{
+static uint8_t piece_values_T[] = {
     0,0,0,
     0,2,0,
     2,2,2,
 };
 
-static uint8_t piece_values_S[] =
-{
+static uint8_t piece_values_S[] = {
     0,0,0,
     0,3,3,
     3,3,0,
 };
 
-static uint8_t piece_values_Z[] =
-{
+static uint8_t piece_values_Z[] = {
     0,0,0,
     4,4,0,
     0,4,4,
 };
 
-static uint8_t piece_values_O[] =
-{
+static uint8_t piece_values_O[] = {
     5,5,
     5,5,
 };
 
-const tetromino_desc tetrominoes[TETROMINO_COUNT] =
-{
+static uint8_t piece_values_L[] = {
+    6,0,0,
+    6,6,6,
+    0,0,0,
+};
+
+static uint8_t piece_values_J[] = {
+    0,0,7,
+    7,7,7,
+    0,0,0,
+};
+
+const tetromino_desc tetrominoes[TETROMINO_COUNT] = {
     // I piece
     {
         4,
@@ -71,6 +77,16 @@ const tetromino_desc tetrominoes[TETROMINO_COUNT] =
         2,
         piece_values_O
     },
+    // Z piece
+    {
+        3,
+        piece_values_L
+    },
+    // Z piece
+    {
+        3,
+        piece_values_J
+    },
 };
 
 const uint32_t colors_base[] = {
@@ -79,6 +95,8 @@ const uint32_t colors_base[] = {
     0x99992D,
     0x992D99,
     0x2D9951,
+    0x2D6399,
+    0x99632D
 };
 
 const uint32_t colors_dark[] = {
@@ -87,6 +105,8 @@ const uint32_t colors_dark[] = {
     0x66661E,
     0x661E66,
     0x1E6636,
+    0x1E4266,
+    0x66421E
 };
 
 const uint32_t colors_light[] = {
@@ -95,13 +115,14 @@ const uint32_t colors_light[] = {
     0xE5E544,
     0xE544E5,
     0x44E57A,
+    0x4495E5,
+    0xE59544
 };
 
 static int
 get_frames_between_drops(int level)
 {
-    static int lut[30] =
-    {
+    static int lut[30] = {
         48,43,38,33,28,23,18,13,8,6,5,5,5,4,4,4,3,3,3,2,2,2,2,2,2,2,2,2,2,1
     };
     if(level > 29)
@@ -242,6 +263,96 @@ spawn_new_piece(game *g)
 }
 
 static void
+remove_filled_lines(game *g)
+{
+    int source_row_index = FIELD_HEIGHT - 1;
+    int destination_row_index = FIELD_HEIGHT - 1;
+    while(source_row_index >= 0)
+    {
+        if(g->linefill.filled_lines[source_row_index])
+        {
+            --source_row_index;
+            continue;
+        }
+        uint8_t *src = g->field + source_row_index*FIELD_WIDTH;
+        uint8_t *dst = g->field + destination_row_index*FIELD_WIDTH;
+        for(int x = 0; x < FIELD_WIDTH; ++x)
+        {
+            dst[x] = src[x];
+        }
+        --source_row_index, --destination_row_index;
+    }
+
+    // Fill the rest of the field with 0
+    while(destination_row_index >= 0)
+    {
+        uint8_t *dst = g->field + destination_row_index*FIELD_WIDTH;
+        for(int x = 0; x < FIELD_WIDTH; ++x)
+        {
+            dst[x] = 0;
+        }
+        --destination_row_index;
+    }
+}
+
+static int
+update_game_linefill(game *g, input *in, bitmap frame)
+{
+    --g->linefill.frames_left;
+    if(g->linefill.frames_left <= 0)
+    {
+        apo_led_line_set_word(0);
+        g->state = GAME_PLAYING;
+        remove_filled_lines(g);
+        spawn_new_piece(g);
+        return 0;
+    }
+
+    apo_led_line_set_word(g->linefill.led_word);
+    g->linefill.led_word = ~g->linefill.led_word;
+
+    return 0;
+}
+
+static int
+get_filled_lines(game *g, uint8_t *filled_lines_array)
+{
+    int filled_lines_count = 0;
+    for(int y = 0; y < FIELD_HEIGHT; ++y)
+    {
+        uint8_t filled = 1;
+        for(int x = 0; x < FIELD_WIDTH; ++x)
+        {
+            if(!g->field[y*FIELD_WIDTH + x])
+            {
+                filled = 0;
+                break;
+            }
+        }
+        filled_lines_count += filled;
+        filled_lines_array[y] = filled;
+    }
+    return filled_lines_count;
+}
+
+static void
+handle_merged_piece(game *g)
+{
+    g->linefill.filled_lines_count = get_filled_lines(g, g->linefill.filled_lines);
+    if(g->linefill.filled_lines_count == 0)
+    {
+        remove_filled_lines(g);
+        spawn_new_piece(g);
+    }
+    else
+    {
+        g->state = GAME_LINEFILL;
+        g->linefill.frames_left = 20;
+        g->linefill.led_word = 0x55555555;
+    }
+}
+
+static void
 draw_piece(game *g, bitmap frame)
 {
     const tetromino_desc *piece_desc = tetrominoes + g->active.tetromino_desc_index;
@@ -293,29 +404,36 @@ draw_playing_field(game *g, bitmap frame)
 static int
 update_game_playing(game *g, input *in, bitmap frame)
 {
+    if(in->keys[KEY_ESCAPE])
+    {
+        return 1;
+    }
+
     if(in->keys[KEY_UP])
     {
         rotate(g);
     }
-    if(in->keys[KEY_LEFT])
+    else if(in->keys[KEY_LEFT])
     {
         move_sideways(g, -1);
     }
-    if(in->keys[KEY_RIGHT])
+    else if(in->keys[KEY_RIGHT])
     {
         move_sideways(g, 1);
     }
-    if(in->keys[KEY_DOWN])
+    else if(in->keys[KEY_DOWN])
     {
         if(!soft_drop(g))
         {
-            spawn_new_piece(g);
+            handle_merged_piece(g);
+            return 0;
         }
     }
-    if(in->keys[KEY_SPACE])
+    else if(in->keys[KEY_SPACE])
     {
         hard_drop(g);
-        spawn_new_piece(g);
+        handle_merged_piece(g);
+        return 0;
     }
 
     g->active.frames_since_drop += 1;
@@ -323,17 +441,14 @@ update_game_playing(game *g, input *in, bitmap frame)
     {
         if(!soft_drop(g))
         {
-            spawn_new_piece(g);
+            handle_merged_piece(g);
+            return 0;
         }
     }
 
     draw_playing_field(g, frame);
     draw_piece(g, frame);
 
-    if(in->keys[KEY_ESCAPE])
-    {
-        return 1;
-    }
     return 0;
 }
 
@@ -345,6 +460,11 @@ update_game(game *g, input *in, bitmap frame)
         case GAME_PLAYING:
         {
             return update_game_playing(g, in, frame);
+        } break;
+
+        case GAME_LINEFILL:
+        {
+            return update_game_linefill(g, in, frame);
         } break;
     }
     return 0;
