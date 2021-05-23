@@ -341,7 +341,6 @@ handle_merged_piece(game *g)
     g->linefill.filled_lines_count = get_filled_lines(g, g->linefill.filled_lines);
     if(g->linefill.filled_lines_count == 0)
     {
-        remove_filled_lines(g);
         spawn_new_piece(g);
     }
     else
