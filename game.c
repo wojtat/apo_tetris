@@ -240,6 +240,10 @@ spawn_new_piece(game *g)
     g->active.rotation = 0;
     g->active.frames_since_drop = 0;
     g->active.tetromino_desc_index = piece_index;
+    if(piece_collides(g))
+    {
+        g->state = GAME_GAMEOVER;
+    }
 }
 
 static void
@@ -364,14 +368,37 @@ draw_playing_field(game *g, bitmap frame)
 }
 
 static void
+draw_gameover(game *g, bitmap frame)
+{
+    char *string = "GAME OVER";
+    int width;
+    get_string_size(g->font, g->scale, string, &width, NULL);
+    int start_x = (frame.width - width) / 2;
+    int start_y = frame.height / 2;
+    draw_string(frame, start_x, start_y, NULL, NULL, g->font, g->scale, string, 0xffffff);
+}
+
+static void
 draw_game(game *g, bitmap frame)
 {
-    draw_playing_field(g, frame);
-    draw_piece(g, frame);
+    switch(g->state)
+    {
+        case GAME_PLAYING:
+        case GAME_LINEFILL:
+        {
+            draw_playing_field(g, frame);
+            draw_piece(g, frame);
+        } break;
+
+        case GAME_GAMEOVER:
+        {
+            draw_gameover(g, frame);
+        } break;
+    }
 }
 
 static int
-update_game_linefill(game *g, input *in, bitmap frame)
+update_game_linefill(game *g, input *in)
 {
     --g->linefill.frames_left;
     if(g->linefill.frames_left <= 0)
@@ -390,7 +417,7 @@ update_game_linefill(game *g, input *in, bitmap frame)
 }
 
 static int
-update_game_playing(game *g, input *in, bitmap frame)
+update_game_playing(game *g, input *in)
 {
     if(in->keys[KEY_UP])
     {
@@ -436,6 +463,16 @@ update_game_playing(game *g, input *in, bitmap frame)
     return 0;
 }
 
+static int
+update_game_gameover(game *g, input *in)
+{
+    if(in->keys[KEY_ESCAPE])
+    {
+        return 1;
+    }
+    return 0;
+}
+
 int
 update_game(game *g, input *in, bitmap frame)
 {
@@ -444,12 +481,17 @@ update_game(game *g, input *in, bitmap frame)
     {
         case GAME_PLAYING:
         {
-            should_quit = update_game_playing(g, in, frame);
+            should_quit = update_game_playing(g, in);
         } break;
 
         case GAME_LINEFILL:
         {
-            should_quit = update_game_linefill(g, in, frame);
+            should_quit = update_game_linefill(g, in);
+        } break;
+
+        case GAME_GAMEOVER:
+        {
+            should_quit = update_game_gameover(g, in);
         } break;
     }
 

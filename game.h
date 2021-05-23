@@ -43,6 +43,7 @@ typedef enum game_state
 {
     GAME_PLAYING,
     GAME_LINEFILL,
+    GAME_GAMEOVER,
 } game_state;
 
 typedef struct game
@@ -54,6 +55,9 @@ typedef struct game
     int score;
     tetromino active;
 
+    font_descriptor_t *font;
+    int scale;
+
     struct
     {
         int frames_left;
@@ -61,6 +65,10 @@ typedef struct game
         uint8_t filled_lines[FIELD_HEIGHT];
         uint32_t led_word;
     } linefill;
+
+    struct
+    {
+    } gameover;
 } game;
 
 typedef struct input
