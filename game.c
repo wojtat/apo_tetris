@@ -340,6 +340,8 @@ handle_merged_piece(game *g)
         g->state = GAME_LINEFILL;
         g->linefill.frames_left = 20;
         g->linefill.led_word = 0x55555555;
+        g->linefill.led_colors[0] = 0x00ff0000;
+        g->linefill.led_colors[1] = 0x000000ff;
     }
 }
 
@@ -420,12 +422,24 @@ update_game_linefill(game *g, input *in)
     if(g->linefill.frames_left <= 0)
     {
         apo_led_line_set_word(0);
+        apo_led_set_color(1, 0);
+        apo_led_set_color(2, 0);
         g->state = GAME_PLAYING;
         remove_filled_lines(g);
         spawn_new_piece(g);
         return 0;
     }
 
+    if(g->linefill.frames_left % 2 == 0)
+    {
+        apo_led_set_color(1, g->linefill.led_colors[0]);
+        apo_led_set_color(2, g->linefill.led_colors[1]);
+    }
+    else
+    {
+        apo_led_set_color(1, g->linefill.led_colors[1]);
+        apo_led_set_color(2, g->linefill.led_colors[0]);
+    }
     apo_led_line_set_word(g->linefill.led_word);
     g->linefill.led_word = ~g->linefill.led_word;
 

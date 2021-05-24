@@ -69,6 +69,7 @@ typedef struct game
         int filled_lines_count;
         uint8_t filled_lines[FIELD_HEIGHT];
         uint32_t led_word;
+        uint32_t led_colors[2];
     } linefill;
 
     struct
