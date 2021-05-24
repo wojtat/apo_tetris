@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     g.font = &font_winFreeSystem14x16;
     g.scale_large = 4;
     g.scale_small = 2;
-    g.start.m = g.gameover.m = make_menu(g.font, g.scale_large, g.scale_small, 0xffffff, 0xff0000);;
+    g.start.m = g.pause.m = g.gameover.m = make_menu(g.font, g.scale_large, g.scale_small, 0xffffff, 0xff0000);
 
     float last_frame_time = get_current_time();
     float target_millis_per_frame = 1000.f / 20.f;

@@ -26,6 +26,7 @@ typedef enum game_state
     GAME_START,
     GAME_PLAYING,
     GAME_LINEFILL,
+    GAME_PAUSE,
     GAME_GAMEOVER,
 } game_state;
 
@@ -46,6 +47,11 @@ typedef struct game
 
     struct
     {
+        menu m;
+    } start;
+
+    struct
+    {
         int frames_left;
         int filled_lines_count;
         uint8_t filled_lines[FIELD_HEIGHT];
@@ -56,12 +62,12 @@ typedef struct game
     struct
     {
         menu m;
-    } gameover;
+    } pause;
 
     struct
     {
         menu m;
-    } start;
+    } gameover;
 } game;
 
 int update_game(game *g, input *in, bitmap frame);

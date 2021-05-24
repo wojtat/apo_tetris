@@ -3,8 +3,8 @@
 
 static uint8_t piece_values_I[] = {
     0,0,0,0,
-    0,0,0,0,
     1,1,1,1,
+    0,0,0,0,
     0,0,0,0,
 };
 
@@ -15,15 +15,15 @@ static uint8_t piece_values_T[] = {
 };
 
 static uint8_t piece_values_S[] = {
-    0,0,0,
     0,3,3,
     3,3,0,
+    0,0,0,
 };
 
 static uint8_t piece_values_Z[] = {
-    0,0,0,
     4,4,0,
     0,4,4,
+    0,0,0,
 };
 
 static uint8_t piece_values_O[] = {

@@ -119,7 +119,7 @@ spawn_new_piece(game *g)
 {
     int piece_index = rand() % TETROMINO_COUNT;
     g->active.xoff = (FIELD_WIDTH - tetrominoes[piece_index].side_length) / 2;
-    g->active.yoff = tetrominoes[piece_index].side_length / 2;
+    g->active.yoff = 0;
     g->active.rotation = 0;
     g->active.frames_since_drop = 0;
     g->active.tetromino_desc_index = piece_index;
@@ -370,7 +370,8 @@ update_game_playing(game *g, input *in)
 
     if(in->keys[KEY_ESCAPE])
     {
-        return 1;
+        g->state = GAME_PAUSE;
+        g->pause.m.selected = 0;
     }
     return 0;
 }
@@ -429,6 +430,30 @@ update_game_start(game *g, input *in, bitmap frame)
     return 0;
 }
 
+static int
+update_game_pause(game *g, input *in, bitmap frame)
+{
+    menu_start_update(&g->pause.m, in, frame, 3);
+    menu_do_title(&g->pause.m, "PAUSE MENU\n");
+
+    if(menu_do_item(&g->pause.m, "Resume Game\n") == INTERACTION_ENTER)
+    {
+        g->state = GAME_PLAYING;
+    }
+    if(menu_do_item(&g->pause.m, "Start Menu\n") == INTERACTION_ENTER)
+    {
+        g->state = GAME_START;
+        memset(g->field, 0, FIELD_WIDTH*FIELD_HEIGHT);
+        g->start_level = g->level = g->total_lines = g->score = 0;
+        g->start.m.selected = 0;
+    }
+    if(menu_do_item(&g->pause.m, "Exit\n") == INTERACTION_ENTER)
+    {
+        return 1;
+    }
+    return 0;
+}
+
 int
 update_game(game *g, input *in, bitmap frame)
 {
@@ -448,6 +473,10 @@ update_game(game *g, input *in, bitmap frame)
         {
             should_quit = update_game_linefill(g, in);
             draw_game(g, frame);
+        } break;
+        case GAME_PAUSE:
+        {
+            should_quit = update_game_pause(g, in, frame);
         } break;
         case GAME_GAMEOVER:
         {
