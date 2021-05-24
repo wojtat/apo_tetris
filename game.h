@@ -10,35 +10,16 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "tetrominoes.h"
 #include "bitmap.h"
-#include "mzapo_api.h"
 #include "menu.h"
 
 enum
 {
-    TETROMINO_COUNT = 7,
-
     FIELD_WIDTH = 10,
     FIELD_HEIGHT = 22,
     FIELD_VISIBLE_HEIGHT = 20,
 };
-
-typedef struct tetromino_desc
-{
-    int side_length;
-    uint8_t *values;
-} tetromino_desc;
-
-extern const tetromino_desc tetrominoes[TETROMINO_COUNT];
-
-typedef struct tetromino
-{
-    int xoff;
-    int yoff;
-    int rotation;
-    int tetromino_desc_index;
-    int frames_since_drop;
-} tetromino;
 
 typedef enum game_state
 {

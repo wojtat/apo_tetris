@@ -7,7 +7,7 @@ CXXFLAGS = -g -std=gnu++11 -O1 -Wall
 LDFLAGS = -lrt -lpthread
 #LDLIBS = -lm
 
-SOURCES = main.c mzapo_phys.c mzapo_parlcd.c mzapo_api.c bitmap.c game.c menu.c
+SOURCES = main.c mzapo_phys.c mzapo_parlcd.c mzapo_api.c bitmap.c game.c tetrominoes.c menu.c
 SOURCES += font_prop14x16.c font_rom8x16.c
 TARGET_EXE = tetris
 
