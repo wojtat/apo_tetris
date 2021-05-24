@@ -236,8 +236,8 @@ static void
 spawn_new_piece(game *g)
 {
     int piece_index = rand() % TETROMINO_COUNT;
-    g->active.xoff = 0;
-    g->active.yoff = 0;
+    g->active.xoff = (FIELD_WIDTH - tetrominoes[piece_index].side_length) / 2;
+    g->active.yoff = tetrominoes[piece_index].side_length / 2;
     g->active.rotation = 0;
     g->active.frames_since_drop = 0;
     g->active.tetromino_desc_index = piece_index;
@@ -557,19 +557,16 @@ update_game(game *g, input *in, bitmap frame)
         {
             should_quit = update_game_start(g, in, frame);
         } break;
-
         case GAME_PLAYING:
         {
             should_quit = update_game_playing(g, in);
             draw_game(g, frame);
         } break;
-
         case GAME_LINEFILL:
         {
             should_quit = update_game_linefill(g, in);
             draw_game(g, frame);
         } break;
-
         case GAME_GAMEOVER:
         {
             should_quit = update_game_gameover(g, in, frame);
