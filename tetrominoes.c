@@ -9,9 +9,9 @@ static uint8_t piece_values_I[] = {
 };
 
 static uint8_t piece_values_T[] = {
-    0,0,0,
     0,2,0,
     2,2,2,
+    0,0,0,
 };
 
 static uint8_t piece_values_S[] = {
