@@ -42,6 +42,7 @@ typedef struct tetromino
 
 typedef enum game_state
 {
+    GAME_START,
     GAME_PLAYING,
     GAME_LINEFILL,
     GAME_GAMEOVER,
@@ -74,6 +75,11 @@ typedef struct game
     {
         menu m;
     } gameover;
+
+    struct
+    {
+        menu m;
+    } start;
 } game;
 
 int update_game(game *g, input *in, bitmap frame);

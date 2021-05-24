@@ -50,4 +50,6 @@ void menu_do_title(menu *m, char *title_string);
 
 interaction_type menu_do_item(menu *m, char *display_string);
 
+menu make_menu(font_descriptor_t *font, int scale_large, int scale_small, uint32_t base_color, uint32_t highlight_color);
+
 #endif

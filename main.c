@@ -35,20 +35,16 @@ get_current_time(void)
 
 int main(int argc, char *argv[])
 {
-    printf("Hello world\n");
     apo_initialise();
-    uint32_t colors[3] = {
-        0x00ffff,
-        0xffff00,
-        0xff00ff
-    };
 
     bitmap frame = make_bitmap(480, 320);
+
     game g = {0};
-    g.state = GAME_PLAYING;
+    g.state = GAME_START;
     g.font = &font_winFreeSystem14x16;
     g.scale_large = 4;
     g.scale_small = 2;
+    g.start.m = g.gameover.m = make_menu(g.font, g.scale_large, g.scale_small, 0xffffff, 0xff0000);;
 
     float last_frame_time = get_current_time();
     float target_millis_per_frame = 1000.f / 20.f;
@@ -75,25 +71,6 @@ int main(int argc, char *argv[])
         apo_lcd_draw_frame(frame);
         last_frame_time = current_time;
     }
-
-/*
-    for(int i = 0;; ++i)
-    {
-        apo_led_set_color(1, colors[i % (sizeof(colors)/sizeof(colors[0]))]);
-        apo_led_set_color(2, colors[(i+1) % (sizeof(colors)/sizeof(colors[0]))]);
-        fill_bitmap(frame, 0);
-
-        char *string = "Hello,\nWorld.";
-        int width, height;
-        get_string_size(&font_winFreeSystem14x16, 4, string, &width, &height);
-        draw_rect(frame, 100, 100, 100+width, 100+height, 0x0000ff00);
-        draw_string(frame, 100, 100, NULL, NULL, &font_winFreeSystem14x16, 4, string, 0x00ff0000);
-        
-        apo_lcd_draw_frame(frame);
-        printf("CHANGING COLOR AND DRAWING BITMAP!\n");
-        sleep(4);
-    }
-*/
 
     free_bitmap(&frame);
     return 0;

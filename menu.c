@@ -66,3 +66,15 @@ menu_do_item(menu *m, char *display_string)
     ++m->current_item;
     return interaction;
 }
+
+menu
+make_menu(font_descriptor_t *font, int scale_large, int scale_small, uint32_t base_color, uint32_t highlight_color)
+{
+    menu m = {0};
+    m.scale_large = scale_large;
+    m.scale_small = scale_small;
+    m.font = font;
+    m.base_color = base_color;
+    m.highlight_color = highlight_color;
+    return m;
+}

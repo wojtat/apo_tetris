@@ -245,11 +245,6 @@ spawn_new_piece(game *g)
     {
         g->state = GAME_GAMEOVER;
         g->gameover.m.selected = 0;
-        g->gameover.m.scale_large = g->scale_large;
-        g->gameover.m.scale_small = g->scale_small;
-        g->gameover.m.font = g->font;
-        g->gameover.m.base_color = 0xffffff;
-        g->gameover.m.highlight_color = 0xff0000;
     }
 }
 
@@ -413,16 +408,9 @@ draw_statistics(game *g, bitmap frame)
 static void
 draw_game(game *g, bitmap frame)
 {
-    switch(g->state)
-    {
-        case GAME_PLAYING:
-        case GAME_LINEFILL:
-        {
-            draw_playing_field(g, frame);
-            draw_piece(g, frame);
-            draw_statistics(g, frame);
-        } break;
-    }
+    draw_playing_field(g, frame);
+    draw_piece(g, frame);
+    draw_statistics(g, frame);
 }
 
 static int
@@ -494,15 +482,51 @@ update_game_playing(game *g, input *in)
 static int
 update_game_gameover(game *g, input *in, bitmap frame)
 {
-    menu_start_update(&g->gameover.m, in, frame, 3);
+    menu_start_update(&g->gameover.m, in, frame, 2);
     menu_do_title(&g->gameover.m, "GAME OVER\n");
-    if(menu_do_item(&g->gameover.m, "New Game\n") == INTERACTION_ENTER)
+    if(menu_do_item(&g->gameover.m, "Start Menu\n") == INTERACTION_ENTER)
+    {
+        g->state = GAME_START;
+        memset(g->field, 0, FIELD_WIDTH*FIELD_HEIGHT);
+        g->start_level = g->level = g->total_lines = g->score = 0;
+        g->start.m.selected = 0;
+    }
+    if(menu_do_item(&g->gameover.m, "Exit\n") == INTERACTION_ENTER)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+static int
+update_game_start(game *g, input *in, bitmap frame)
+{
+    menu_start_update(&g->start.m, in, frame, 3);
+    menu_do_title(&g->start.m, "START MENU\n");
+
+    if(menu_do_item(&g->start.m, "New Game\n") == INTERACTION_ENTER)
     {
         g->state = GAME_PLAYING;
         memset(g->field, 0, FIELD_WIDTH*FIELD_HEIGHT);
-        g->start_level = g->level = g->total_lines = g->score = 0;
+        g->level = g->start_level;
+        g->total_lines = g->score = 0;
+        spawn_new_piece(g);
     }
-    if(menu_do_item(&g->gameover.m, "Exit\n") == INTERACTION_ENTER)
+    
+    char start_level_string[32];
+    sprintf(start_level_string, "Start Level %d\n", g->start_level);
+
+    interaction_type type = menu_do_item(&g->start.m, start_level_string);
+    if(type == INTERACTION_LEFT)
+    {
+        --g->start_level;
+    }
+    else if(type == INTERACTION_RIGHT)
+    {
+        ++g->start_level;
+    }
+
+    if(menu_do_item(&g->start.m, "Exit\n") == INTERACTION_ENTER)
     {
         return 1;
     }
@@ -515,6 +539,11 @@ update_game(game *g, input *in, bitmap frame)
     int should_quit = 0;
     switch(g->state)
     {
+        case GAME_START:
+        {
+            should_quit = update_game_start(g, in, frame);
+        } break;
+
         case GAME_PLAYING:
         {
             should_quit = update_game_playing(g, in);
