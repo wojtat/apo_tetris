@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 enum
 {
@@ -243,6 +244,12 @@ spawn_new_piece(game *g)
     if(piece_collides(g))
     {
         g->state = GAME_GAMEOVER;
+        g->gameover.m.selected = 0;
+        g->gameover.m.scale_large = g->scale_large;
+        g->gameover.m.scale_small = g->scale_small;
+        g->gameover.m.font = g->font;
+        g->gameover.m.base_color = 0xffffff;
+        g->gameover.m.highlight_color = 0xff0000;
     }
 }
 
@@ -393,17 +400,6 @@ draw_playing_field(game *g, bitmap frame)
 }
 
 static void
-draw_gameover(game *g, bitmap frame)
-{
-    char *string = "GAME OVER";
-    int width;
-    get_string_size(g->font, g->scale_large, string, &width, NULL);
-    int start_x = (frame.width - width) / 2;
-    int start_y = frame.height / 2;
-    draw_string(frame, start_x, start_y, NULL, NULL, g->font, g->scale_large, string, 0xffffff);
-}
-
-static void
 draw_statistics(game *g, bitmap frame)
 {
     int top = 0;
@@ -425,11 +421,6 @@ draw_game(game *g, bitmap frame)
             draw_playing_field(g, frame);
             draw_piece(g, frame);
             draw_statistics(g, frame);
-        } break;
-
-        case GAME_GAMEOVER:
-        {
-            draw_gameover(g, frame);
         } break;
     }
 }
@@ -501,9 +492,17 @@ update_game_playing(game *g, input *in)
 }
 
 static int
-update_game_gameover(game *g, input *in)
+update_game_gameover(game *g, input *in, bitmap frame)
 {
-    if(in->keys[KEY_ESCAPE])
+    menu_start_update(&g->gameover.m, in, frame, 3);
+    menu_do_title(&g->gameover.m, "GAME OVER\n");
+    if(menu_do_item(&g->gameover.m, "New Game\n") == INTERACTION_ENTER)
+    {
+        g->state = GAME_PLAYING;
+        memset(g->field, 0, FIELD_WIDTH*FIELD_HEIGHT);
+        g->start_level = g->level = g->total_lines = g->score = 0;
+    }
+    if(menu_do_item(&g->gameover.m, "Exit\n") == INTERACTION_ENTER)
     {
         return 1;
     }
@@ -519,20 +518,20 @@ update_game(game *g, input *in, bitmap frame)
         case GAME_PLAYING:
         {
             should_quit = update_game_playing(g, in);
+            draw_game(g, frame);
         } break;
 
         case GAME_LINEFILL:
         {
             should_quit = update_game_linefill(g, in);
+            draw_game(g, frame);
         } break;
 
         case GAME_GAMEOVER:
         {
-            should_quit = update_game_gameover(g, in);
+            should_quit = update_game_gameover(g, in, frame);
         } break;
     }
-
-    draw_game(g, frame);
 
     return should_quit;
 }

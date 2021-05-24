@@ -28,6 +28,11 @@ typedef enum key_id
     KEY_COUNT
 } key_id;
 
+typedef struct input
+{
+    int keys[KEY_COUNT];
+} input;
+
 void apo_initialise(void);
 
 void apo_led_set_color(int led_id, uint32_t color);

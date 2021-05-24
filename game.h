@@ -12,6 +12,7 @@
 
 #include "bitmap.h"
 #include "mzapo_api.h"
+#include "menu.h"
 
 enum
 {
@@ -71,13 +72,9 @@ typedef struct game
 
     struct
     {
+        menu m;
     } gameover;
 } game;
-
-typedef struct input
-{
-    int keys[KEY_COUNT];
-} input;
 
 int update_game(game *g, input *in, bitmap frame);
 
