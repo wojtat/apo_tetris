@@ -430,6 +430,10 @@ update_game_start(game *g, input *in, bitmap frame)
     if(type == INTERACTION_LEFT)
     {
         --g->start_level;
+        if(g->start_level < 0)
+        {
+            g->start_level = 0;
+        }
     }
     else if(type == INTERACTION_RIGHT)
     {
