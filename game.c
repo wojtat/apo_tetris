@@ -1,3 +1,11 @@
+/*******************************************************************
+  Defines an api for the game struct and game related logic
+
+  game.c
+
+  Author: Vojtech Tilhon, tilhovoj@fel.cvut.cz
+
+ *******************************************************************/
 
 #include "tetrominoes.h"
 #include "game.h"

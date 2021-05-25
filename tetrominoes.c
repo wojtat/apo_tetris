@@ -1,3 +1,12 @@
+/*******************************************************************
+  Defines all the possible game pieces
+  and their properties used in the game
+
+  tetrominoes.c
+
+  Author: Vojtech Tilhon, tilhovoj@fel.cvut.cz
+
+ *******************************************************************/
 
 #include "tetrominoes.h"
 

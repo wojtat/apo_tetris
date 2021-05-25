@@ -1,5 +1,5 @@
 /*******************************************************************
-  Defines an api for the game struct
+  Defines an api for the game struct and game related logic
 
   game.h
 

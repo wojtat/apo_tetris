@@ -1,3 +1,13 @@
+/*******************************************************************
+  Defines an immediate GUI style menu, which displays
+  menu items and provides an interface for
+  interacting with them.
+
+  menu.h
+
+  Author: Vojtech Tilhon, tilhovoj@fel.cvut.cz
+
+ *******************************************************************/
 
 #include <stddef.h>
 

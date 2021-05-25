@@ -1,3 +1,13 @@
+/*******************************************************************
+  Defines a standard xrgb 32 bit bitmap
+  (the most significant byte is unused)
+  and operations on such bitmaps
+
+  bitmap.c
+
+  Author: Vojtech Tilhon, tilhovoj@fel.cvut.cz
+
+ *******************************************************************/
 
 #include <stdlib.h>
 #include <stdio.h>
