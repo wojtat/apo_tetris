@@ -33,14 +33,14 @@ typedef struct input
     int keys[KEY_COUNT];
 } input;
 
-void apo_initialise(void);
+void mz_initialise(void);
 
-void apo_led_set_color(int led_id, uint32_t color);
+void mz_led_set_color(int led_id, uint32_t color);
 
-void apo_led_line_set_word(uint32_t word);
+void mz_led_line_set_word(uint32_t word);
 
-void apo_lcd_draw_frame(bitmap frame);
+void mz_lcd_draw_frame(bitmap frame);
 
-key_id apo_read_key_input(void);
+key_id mz_read_key_input(void);
 
 #endif

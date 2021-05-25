@@ -14,6 +14,7 @@
 #include "bitmap.h"
 #include "menu.h"
 
+// Constants for related to the game
 enum
 {
     FIELD_WIDTH = 10,
@@ -21,6 +22,7 @@ enum
     FIELD_VISIBLE_HEIGHT = 20,
 };
 
+// Defines possible states of the game/application
 typedef enum game_state
 {
     GAME_START,
@@ -30,6 +32,7 @@ typedef enum game_state
     GAME_GAMEOVER,
 } game_state;
 
+// The whole game/application structure
 typedef struct game
 {
     game_state state;
@@ -70,6 +73,8 @@ typedef struct game
     } gameover;
 } game;
 
-int update_game(game *g, input *in, bitmap frame);
+// Update the game according to the current state
+// and input and render it to the frame
+int game_update(game *g, input *in, bitmap frame);
 
 #endif

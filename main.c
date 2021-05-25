@@ -14,7 +14,6 @@
 #include <stdint.h>
 #include <time.h>
 #include <unistd.h>
-#include <time.h>
 
 #include "mzapo_parlcd.h"
 #include "mzapo_api.h"
@@ -22,6 +21,7 @@
 #include "game.h"
 #include "font_types.h"
 
+// Get the current time in millis
 float
 get_current_time(void)
 {
@@ -35,43 +35,53 @@ get_current_time(void)
 
 int main(int argc, char *argv[])
 {
-    apo_initialise();
+    // Initialise the hardware control module
+    mz_initialise();
 
-    bitmap frame = make_bitmap(480, 320);
-
+    // Initialise the game and bitmap frame
+    bitmap frame = bitmap_make(480, 320);
     game g = {0};
     g.state = GAME_START;
     g.font = &font_winFreeSystem14x16;
     g.scale_large = 4;
     g.scale_small = 2;
-    g.start.m = g.pause.m = g.gameover.m = make_menu(g.font, g.scale_large, g.scale_small, 0xffffff, 0xff0000);
+    g.start.m = g.pause.m = g.gameover.m = menu_make(g.font, g.scale_large, g.scale_small, 0xffffff, 0xff0000);
 
     float last_frame_time = get_current_time();
+
+    // Run at 20 FPS, ideally
     float target_millis_per_frame = 1000.f / 20.f;
 
     int quit = 0;
     while(!quit)
     {
+        // Wait until the time has come to update
+        // Maybe sleeping would be more efficient
         float current_time = last_frame_time;
         while(last_frame_time + target_millis_per_frame > current_time)
         {
             current_time = get_current_time();
         }
 
+        // Get the input from raw stdin
         input in = {0};
         key_id key;
-        while((key = apo_read_key_input()) != KEY_NONE)
+        while((key = mz_read_key_input()) != KEY_NONE)
         {
             in.keys[key] = 1;
         }
 
-        fill_bitmap(frame, 0);
-        quit = update_game(&g, &in, frame);
+        // Clear the frame and update and render the game
+        bitmap_fill(frame, 0);
+        quit = game_update(&g, &in, frame);
 
-        apo_lcd_draw_frame(frame);
+        // Draw the frame to the LCD display
+        mz_lcd_draw_frame(frame);
         last_frame_time = current_time;
     }
 
-    free_bitmap(&frame);
+    // Cleanup
+    bitmap_free(&frame);
+
     return 0;
 }

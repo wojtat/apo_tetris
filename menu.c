@@ -37,7 +37,7 @@ void
 menu_do_title(menu *m, char *title_string)
 {
     int height = 0;
-    draw_string(m->frame,
+    bitmap_draw_string(m->frame,
         m->current_xoff, m->current_yoff,
         NULL, &height, m->font, m->scale_large,
         title_string, m->base_color);
@@ -67,7 +67,7 @@ menu_do_item(menu *m, char *display_string)
     }
 
     int height = 0;
-    draw_string(m->frame,
+    bitmap_draw_string(m->frame,
         m->current_xoff, m->current_yoff,
         NULL, &height, m->font, m->scale_small,
         display_string, color);
@@ -78,7 +78,7 @@ menu_do_item(menu *m, char *display_string)
 }
 
 menu
-make_menu(font_descriptor_t *font, int scale_large, int scale_small, uint32_t base_color, uint32_t highlight_color)
+menu_make(font_descriptor_t *font, int scale_large, int scale_small, uint32_t base_color, uint32_t highlight_color)
 {
     menu m = {0};
     m.scale_large = scale_large;

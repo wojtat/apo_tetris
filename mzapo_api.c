@@ -72,7 +72,7 @@ rgb888_to_rgb565(uint32_t rgb888)
 }
 
 void
-apo_lcd_draw_frame(bitmap frame)
+mz_lcd_draw_frame(bitmap frame)
 {
     parlcd_write_cmd(lcd_base, 0x2c);
 
@@ -93,7 +93,7 @@ apo_lcd_draw_frame(bitmap frame)
 }
 
 void
-apo_initialise(void)
+mz_initialise(void)
 {
     init_led();
     init_lcd();
@@ -108,7 +108,7 @@ apo_initialise(void)
 }
 
 void
-apo_led_set_color(int led_id, uint32_t color)
+mz_led_set_color(int led_id, uint32_t color)
 {
     switch(led_id)
     {
@@ -130,13 +130,13 @@ apo_led_set_color(int led_id, uint32_t color)
 }
 
 void
-apo_led_line_set_word(uint32_t word)
+mz_led_line_set_word(uint32_t word)
 {
     *(volatile uint32_t *)(led_base + SPILED_REG_LED_LINE_o) = word;
 }
 
 key_id
-apo_read_key_input(void)
+mz_read_key_input(void)
 {
     char buffer[1];
 

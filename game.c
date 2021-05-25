@@ -17,7 +17,7 @@
 
 enum
 {
-    FIELD_TILE_SIZE = 16,
+    FIELD_TILE_SIZE = 16, // Size of a tile in pixels
 };
 
 static int
@@ -37,12 +37,11 @@ static int
 piece_collides(game *g)
 {
     const tetromino_desc *piece_desc = tetrominoes + g->active.tetromino_desc_index;
-
     for(int y = 0; y < piece_desc->side_length; ++y)
     {
         for(int x = 0; x < piece_desc->side_length; ++x)
         {
-            if(get_tetromino_value(&g->active, x, y))
+            if(tetromino_get_value(&g->active, x, y))
             {
                 int actual_x = x + g->active.xoff;
                 int actual_y = y + g->active.yoff;
@@ -64,12 +63,11 @@ static void
 merge_piece(game *g)
 {
     const tetromino_desc *piece_desc = tetrominoes + g->active.tetromino_desc_index;
-
     for(int y = 0; y < piece_desc->side_length; ++y)
     {
         for(int x = 0; x < piece_desc->side_length; ++x)
         {
-            uint8_t piece_value = get_tetromino_value(&g->active, x, y);
+            uint8_t piece_value = tetromino_get_value(&g->active, x, y);
             if(piece_value)
             {
                 int actual_x = x + g->active.xoff;
@@ -122,6 +120,7 @@ move_sideways(game *g, int delta)
     }
 }
 
+// Spawns new piece, if no room is available, go to gameover
 static void
 spawn_new_piece(game *g)
 {
@@ -138,6 +137,7 @@ spawn_new_piece(game *g)
     }
 }
 
+// Removes the filled lines and pushes the above blocks downwards
 static void
 remove_filled_lines(game *g)
 {
@@ -170,6 +170,7 @@ remove_filled_lines(game *g)
         --destination_row_index;
     }
 
+    // Update statistics and advance level if necessary
     g->total_lines += g->linefill.filled_lines_count;
     switch(g->linefill.filled_lines_count)
     {
@@ -217,6 +218,9 @@ get_filled_lines(game *g, uint8_t *filled_lines_array)
     return filled_lines_count;
 }
 
+// See whether any lines have been filled
+// If so, go to state linefill
+// Otherwise just spawn a new piece
 static void
 handle_merged_piece(game *g)
 {
@@ -248,12 +252,12 @@ draw_piece(game *g, bitmap frame)
     {
         for(int x = 0; x < piece_desc->side_length; ++x)
         {
-            uint8_t value = get_tetromino_value(&g->active, x, y);
+            uint8_t value = tetromino_get_value(&g->active, x, y);
             if(value)
             {
                 int actual_x = x + g->active.xoff;
                 int actual_y = y + g->active.yoff;
-                draw_rect(frame,
+                bitmap_draw_rect(frame,
                     left + actual_x*FIELD_TILE_SIZE, top + actual_y*FIELD_TILE_SIZE,
                     left + (actual_x+1)*FIELD_TILE_SIZE, top + (actual_y+1)*FIELD_TILE_SIZE,
                     tetromino_colors[value-1]);
@@ -268,7 +272,7 @@ draw_playing_field(game *g, bitmap frame)
     int top = (FIELD_VISIBLE_HEIGHT - FIELD_HEIGHT)*FIELD_TILE_SIZE;
     int left = (frame.width - FIELD_TILE_SIZE*FIELD_WIDTH) / 2;
 
-    draw_rect(frame, left, top, left + FIELD_WIDTH*FIELD_TILE_SIZE, top + FIELD_HEIGHT*FIELD_TILE_SIZE, 0x333333);
+    bitmap_draw_rect(frame, left, top, left + FIELD_WIDTH*FIELD_TILE_SIZE, top + FIELD_HEIGHT*FIELD_TILE_SIZE, 0x333333);
 
     for(int y = FIELD_HEIGHT - FIELD_VISIBLE_HEIGHT; y < FIELD_HEIGHT; ++y)
     {
@@ -277,7 +281,7 @@ draw_playing_field(game *g, bitmap frame)
             uint8_t value = g->field[y*FIELD_WIDTH + x];
             if(value)
             {
-                draw_rect(frame,
+                bitmap_draw_rect(frame,
                     left + x*FIELD_TILE_SIZE, top + y*FIELD_TILE_SIZE,
                     left + (x+1)*FIELD_TILE_SIZE, top + (y+1)*FIELD_TILE_SIZE,
                     tetromino_colors[value-1]);
@@ -294,9 +298,10 @@ draw_statistics(game *g, bitmap frame)
 
     char stats[64];
     sprintf(stats, "LEVEL\n%06d\n\nLINES\n%06d\n\nSCORE\n%06d", g->level, g->total_lines, g->score);
-    draw_string(frame, left, top, NULL, NULL, g->font, g->scale_small, stats, 0xffffff);
+    bitmap_draw_string(frame, left, top, NULL, NULL, g->font, g->scale_small, stats, 0xffffff);
 }
 
+// Draws the game, only use this when in state playing or linefill
 static void
 draw_game(game *g, bitmap frame)
 {
@@ -311,9 +316,9 @@ update_game_linefill(game *g, input *in)
     --g->linefill.frames_left;
     if(g->linefill.frames_left <= 0)
     {
-        apo_led_line_set_word(0);
-        apo_led_set_color(1, 0);
-        apo_led_set_color(2, 0);
+        mz_led_line_set_word(0);
+        mz_led_set_color(1, 0);
+        mz_led_set_color(2, 0);
         g->state = GAME_PLAYING;
         remove_filled_lines(g);
         spawn_new_piece(g);
@@ -322,15 +327,15 @@ update_game_linefill(game *g, input *in)
 
     if(g->linefill.frames_left % 2 == 0)
     {
-        apo_led_set_color(1, g->linefill.led_colors[0]);
-        apo_led_set_color(2, g->linefill.led_colors[1]);
+        mz_led_set_color(1, g->linefill.led_colors[0]);
+        mz_led_set_color(2, g->linefill.led_colors[1]);
     }
     else
     {
-        apo_led_set_color(1, g->linefill.led_colors[1]);
-        apo_led_set_color(2, g->linefill.led_colors[0]);
+        mz_led_set_color(1, g->linefill.led_colors[1]);
+        mz_led_set_color(2, g->linefill.led_colors[0]);
     }
-    apo_led_line_set_word(g->linefill.led_word);
+    mz_led_line_set_word(g->linefill.led_word);
     g->linefill.led_word = ~g->linefill.led_word;
 
     return 0;
@@ -463,7 +468,7 @@ update_game_pause(game *g, input *in, bitmap frame)
 }
 
 int
-update_game(game *g, input *in, bitmap frame)
+game_update(game *g, input *in, bitmap frame)
 {
     int should_quit = 0;
     switch(g->state)

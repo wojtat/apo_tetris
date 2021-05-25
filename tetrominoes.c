@@ -101,7 +101,7 @@ const uint32_t tetromino_colors[] = {
 };
 
 uint8_t
-get_tetromino_value(tetromino *piece, int x, int y)
+tetromino_get_value(tetromino *piece, int x, int y)
 {
     const tetromino_desc *piece_desc = tetrominoes + piece->tetromino_desc_index;
     int side = piece_desc->side_length;

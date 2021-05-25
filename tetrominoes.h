@@ -13,17 +13,20 @@
 
 #include <stdint.h>
 
+// The number of tetrominoes that exist
 enum
 {
     TETROMINO_COUNT = 7,
 };
 
+// Describes an individual tetromino shape and size
 typedef struct tetromino_desc
 {
     int side_length;
     uint8_t *values;
 } tetromino_desc;
 
+// Represents an actively moving tetromino piece
 typedef struct tetromino
 {
     int xoff;
@@ -33,9 +36,13 @@ typedef struct tetromino
     int frames_since_drop;
 } tetromino;
 
+// The colors associated with the tetrominoes
 extern const uint32_t tetromino_colors[TETROMINO_COUNT];
+// The shapes and sizes associated with the tetrominoes
 extern const tetromino_desc tetrominoes[TETROMINO_COUNT];
 
-uint8_t get_tetromino_value(tetromino *piece, int x, int y);
+// Get the value at the specified x an y of an actively moving tetromino
+// taking into account the rotation as well
+uint8_t tetromino_get_value(tetromino *piece, int x, int y);
 
 #endif

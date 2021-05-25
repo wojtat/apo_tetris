@@ -18,6 +18,8 @@
 #include "mzapo_api.h"
 #include "bitmap.h"
 
+// Defines the types of interactions the user
+// may have with a menu item
 typedef enum interaction_type
 {
     INTERACTION_NONE = 0,
@@ -26,6 +28,7 @@ typedef enum interaction_type
     INTERACTION_RIGHT,
 } interaction_type;
 
+// Defines the structure that holds the menu specific date
 typedef struct menu
 {
     int selected;
@@ -44,12 +47,17 @@ typedef struct menu
     int current_item;
 } menu;
 
+// Called at the beginning of every update, sets up the menu for the frame
 void menu_start_update(menu *m, input *in, bitmap frame, int item_count);
 
+// Draws a large unselectable text as part of the menu
 void menu_do_title(menu *m, char *title_string);
 
+// Draws a menu item text and returns the type of
+// interaction the user had with the item
 interaction_type menu_do_item(menu *m, char *display_string);
 
-menu make_menu(font_descriptor_t *font, int scale_large, int scale_small, uint32_t base_color, uint32_t highlight_color);
+// Makes a menu with the specified properties
+menu menu_make(font_descriptor_t *font, int scale_large, int scale_small, uint32_t base_color, uint32_t highlight_color);
 
 #endif

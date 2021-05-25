@@ -15,7 +15,7 @@
 #include "bitmap.h"
 
 bitmap
-make_bitmap(int width, int height)
+bitmap_make(int width, int height)
 {
     bitmap b;
 
@@ -27,7 +27,7 @@ make_bitmap(int width, int height)
 }
 
 void
-free_bitmap(bitmap *b)
+bitmap_free(bitmap *b)
 {
     free(b->pixels);
     b->pixels = NULL;
@@ -35,13 +35,13 @@ free_bitmap(bitmap *b)
 }
 
 void
-fill_bitmap(bitmap b, uint32_t color)
+bitmap_fill(bitmap b, uint32_t color)
 {
-    draw_rect(b, 0, 0, b.width, b.height, color);
+    bitmap_draw_rect(b, 0, 0, b.width, b.height, color);
 }
 
 void
-draw_rect(bitmap b, int x0, int y0, int x1, int y1, uint32_t color)
+bitmap_draw_rect(bitmap b, int x0, int y0, int x1, int y1, uint32_t color)
 {
     // Clamp
     y0 = y0 < 0 ? 0 : y0;
@@ -62,14 +62,7 @@ draw_rect(bitmap b, int x0, int y0, int x1, int y1, uint32_t color)
     }
 }
 
-void
-draw_shaded_rect(bitmap b, int x0, int y0, int x1, int y1, uint32_t color_base, uint32_t color_dark, uint32_t color_light)
-{
-    draw_rect(b, x0, y0, x1, y1, color_dark);
-    draw_rect(b, x0+1, y0, x1, y1-1, color_light);
-    draw_rect(b, x0-1, y0-1, x1-1, y1-1, color_base);
-}
-
+// Get the width of a char, doesn't account for the scaling
 static int
 get_char_width(font_descriptor_t *font, char c)
 {
@@ -115,7 +108,7 @@ draw_char(bitmap b, int x0, int y0, font_descriptor_t *font, int scale, char c, 
         {
             if((val & 0x8000) != 0)
             {
-                draw_rect(b, x0 + x*scale, y0 + y*scale, x0 + (x+1)*scale, y0 + (y+1)*scale, color);
+                bitmap_draw_rect(b, x0 + x*scale, y0 + y*scale, x0 + (x+1)*scale, y0 + (y+1)*scale, color);
             }
             val <<= 1;
         }
@@ -125,45 +118,7 @@ draw_char(bitmap b, int x0, int y0, font_descriptor_t *font, int scale, char c, 
 }
 
 void
-get_string_size(font_descriptor_t *font, int scale, char *string, int *out_width, int *out_height)
-{
-    int max_width = 0;
-    int current_width = 0;
-    int height = font->height;
-    while(*string)
-    {
-        if(*string == '\n')
-        {
-            height += font->height;
-            if(current_width > max_width)
-            {
-                max_width = current_width;
-            }
-            current_width = 0;
-        }
-        else
-        {
-            current_width += get_char_width(font, *string);
-        }
-        ++string;
-    }
-    if(current_width > max_width)
-    {
-        max_width = current_width;
-    }
-    
-    if(out_width)
-    {
-        *out_width = max_width * scale;
-    }
-    if(out_height)
-    {
-        *out_height = height * scale;
-    }
-}
-
-void
-draw_string(bitmap b, int x, int y, int *out_x, int *out_y, font_descriptor_t *font, int scale, char *string, uint32_t color)
+bitmap_draw_string(bitmap b, int x, int y, int *out_x, int *out_y, font_descriptor_t *font, int scale, char *string, uint32_t color)
 {
     int current_xoff = 0;
     int current_yoff = 0;
