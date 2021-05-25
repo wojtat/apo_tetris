@@ -20,4 +20,4 @@ Escape brings up the pause menu, which allows the user to exit or return to
 the start menu. When the game is over, a game over menu appears which prompts
 the user to either return to the start menu or exit.
 ## The Block Schema
-![block_schema.png](https://gitlab.fel.cvut.cz/B202_B0B35APO/tilhovoj/-/blob/dev/block_schema.png)
+![block_schema.png](block_schema.png)
