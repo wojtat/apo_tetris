@@ -80,6 +80,10 @@ int main(int argc, char *argv[])
         last_frame_time = current_time;
     }
 
+    // Clear the display
+    bitmap_fill(frame, 0);
+    mz_lcd_draw_frame(frame);
+
     // Cleanup
     bitmap_free(&frame);
 
